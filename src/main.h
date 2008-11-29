@@ -19,6 +19,8 @@
 #define DEFAULT_FORMAT 	"wav"
 #endif
 
+#define OSC_PORT "7133"
+
 extern GtkWidget *main_window;
 
 extern GdkPixbuf *img_on, *img_off, *img_busy;

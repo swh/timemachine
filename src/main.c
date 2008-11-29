@@ -39,6 +39,10 @@ lash_client_t *lash_client;
 #include <readline/history.h>
 #endif
 
+#ifdef HAVE_LIBLO
+#include <lo/lo.h>
+#endif
+
 #include "threads.h"
 #include "interface.h"
 #include "meters.h"
@@ -71,6 +75,13 @@ jack_client_t *client;
 
 GdkPixbuf *img_on, *img_off, *img_busy;
 GdkPixbuf *icon_on, *icon_off;
+
+#ifdef HAVE_LIBLO
+int osc_handler(const char *path, const char *types, lo_arg **argv, int argc,
+		lo_message msg, void *user_data);
+int osc_handler_nox(const char *path, const char *types, lo_arg **argv,
+		int argc, lo_message msg, void *user_data);
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -219,6 +230,17 @@ int main(int argc, char *argv[])
 
 #ifdef HAVE_LIBREADLINE
     if (console || !getenv("DISPLAY") || getenv("DISPLAY")[0] == '\0') {
+#ifdef HAVE_LIBLO
+      lo_server_thread st = lo_server_thread_new(OSC_PORT, NULL);
+      if (st) {
+	  lo_server_thread_add_method(st, "/start", "", osc_handler_nox, (void *)1);
+	  lo_server_thread_add_method(st, "/stop", "", osc_handler_nox, (void *)0);
+	  lo_server_thread_start(st);
+	  printf("Listening for OSC requests on osc.udp://localhost:%s\n",
+	    OSC_PORT);
+      }
+#endif
+
       int done = 0;
       while (!done) {
 	char *line = readline("TimeMachine> ");
@@ -260,6 +282,17 @@ int main(int argc, char *argv[])
 
       bind_meters();
       g_timeout_add(100, meter_tick, NULL);
+
+#ifdef HAVE_LIBLO
+    lo_server_thread st = lo_server_thread_new(OSC_PORT, NULL);
+    if (st) {
+	lo_server_thread_add_method(st, "/start", "", osc_handler, (void *)1);
+	lo_server_thread_add_method(st, "/stop", "", osc_handler, (void *)0);
+	lo_server_thread_start(st);
+	printf("Listening for OSC requests on osc.udp://localhost:%s\n",
+	       OSC_PORT);
+    }
+#endif
 
 #ifdef HAVE_LASH
       gtk_idle_add(idle_cb, lash_client);
