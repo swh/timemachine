@@ -1,0 +1,11 @@
+*.o
+Makefile
+Makefile.in
+*.m4
+config.*
+install-sh
+autom4te.cache
+configure
+depcomp
+missing
+stamp-h1
