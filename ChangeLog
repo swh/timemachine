@@ -1,0 +1,58 @@
+2005-09-19  Steve Harris  <steve@plugin.org.uk>
+
+	* main.c: Change LADCCA suport to LASH support, add code to send name
+	  to LASH server.
+
+2005-01-22  Steve Harris  <steve@plugin.org.uk>
+
+	* gtkmeter.c: fixed incorrect constant in gtkmeter.c that caused the
+	  meter to jump between -50 and -60 dB's.
+
+release 0.3.0
+
+2004-10-28  Steve Harris  <steve@plugin.org.uk>
+
+	* main.c: made commandline mode trigerable from the command line, and a
+	  bit less fussy about what consitiutes DISPLAY bieng unset. Improved
+	  help information.
+
+2004-09-13  Steve Harris  <steve@plugin.org.uk>
+
+	* main.c: added commandline mode to run without X11 (from Mario Lang).
+
+release 0.2.5
+
+2004-09-07  Steve Harris  <steve@plugin.org.uk>
+
+	* main.c: added format option, added port command line names connection
+
+2004-07-22  Steve Harris  <steve@plugin.org.uk>
+
+	* main.c: applied patch from Joern Nettingsmeier to make building
+	  without LADCCA work.
+
+2004-03-03  Steve Harris  <steve@plugin.org.uk>
+
+	* main.c, callbacks.c: added icons for on and off states
+
+2004-03-03  Steve Harris  <steve@plugin.org.uk>
+
+	* main.c: Finished off LADCCA support, added quit handling, added
+		  DEBUG macro, minor cleanups.
+
+2004-03-02  Steve Harris  <steve@plugin.org.uk>
+
+	* interface.c: fixed bug that prevented running with 1 channel
+
+2004-02-20  Steve Harris  <steve@plugin.org.uk>
+
+	* configure.in: added test for LADCCA (from rah)
+
+	* main.c: added LADCCA initialisation code
+
+2004-02-18  Steve Harris  <steve@plugin.org.uk>
+
+	* interface.c: changed the button to a gtk_button
+
+	* threads.c: made the button dead when theres stuff to be written
+	  out to disk from the pre-buffer

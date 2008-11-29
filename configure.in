@@ -1,0 +1,79 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(configure.in)
+AM_INIT_AUTOMAKE(timemachine, 0.3.1)
+AM_CONFIG_HEADER(config.h)
+AM_MAINTAINER_MODE
+
+AC_ISC_POSIX
+AC_PROG_CC
+AM_PROG_CC_STDC
+AC_HEADER_STDC
+
+PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0.0])
+
+PKG_CHECK_MODULES(JACK, [jack >= 0.80.0])
+
+##############
+### LASH ###
+##############
+tm_enable_lash="yes"
+AC_ARG_ENABLE(lash,
+[  --disable-lash        disable LASH support],[
+  case "$enableval" in
+    "yes")
+      ;;
+    "no")
+      tm_enable_lash="no"
+      ;;
+    *)
+      AC_MSG_ERROR([must use --enable-lash(=yes/no) or --disable-lash])
+      ;;
+  esac
+])
+
+if test "$tm_enable_lash" = "yes"; then
+  PKG_CHECK_MODULES(LASH, lash-1.0 >= 0.4.0, LASH_FOUND="yes", LASH_FOUND="no")
+  
+  if test "$LASH_FOUND" = "yes"; then
+    AC_DEFINE(HAVE_LASH, 1, [whether or not we are supporting lash])
+    LASH_VERSION=$( pkg-config --modversion lash-1.0 )
+    AC_DEFINE_UNQUOTED(LASH_VERSION, "$LASH_VERSION", [The version of lash we're compiling against])
+    AC_SUBST(LASH_CFLAGS)
+    AC_SUBST(LASH_LIBS)
+  fi
+else
+  AC_MSG_WARN([LASH support is disabled])
+  LASH_FOUND="no"
+fi
+AM_CONDITIONAL(HAVE_LASH, test "$LASH_FOUND" = "yes")
+
+PKG_CHECK_MODULES(SNDFILE, [sndfile >= 1.0.0])
+AC_CHECK_DECL(
+	SF_FORMAT_W64,
+	[AC_DEFINE(HAVE_W64, [], [Do we have the WAV64 format])],
+	[AC_MSG_WARN()
+	 AC_MSG_WARN([Your version of libsndfile does not support the WAV64])
+	 AC_MSG_WARN([format. This means that you will be unable to record])
+	 AC_MSG_WARN([files > 2GB])
+	 AC_MSG_WARN()],
+	[#include <sndfile.h>]
+)
+
+AC_CHECK_LIB([curses], [tgetnum])
+AC_CHECK_LIB([readline], [readline])
+
+AC_CHECK_LIB([pthread], [pthread_self], , [AC_MSG_ERROR(Can't find libpthread)])
+
+PACKAGE_CFLAGS="-g -Wall $GTK_CFLAGS $JACK_CFLAGS $LASH_CFLAGS $SNDFILE_CFLAGS"
+PACKAGE_LIBS="-g $GTK_LIBS $JACK_LIBS $LASH_LIBS $SNDFILE_LIBS"
+
+AC_SUBST(PACKAGE_CFLAGS)
+AC_SUBST(PACKAGE_LIBS)
+
+AC_OUTPUT([
+Makefile
+src/Makefile
+pixmaps/Makefile
+])
+
