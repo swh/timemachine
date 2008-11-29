@@ -164,7 +164,7 @@ int writer_thread(void *d)
 	for (j = 0; j < BUF_SIZE && i < pre_size; i++, j++) {
 	    for (k = 0; k < num_ports; k++) {
 		buf[j * num_ports + k] =
-		    pre_buffer[k][(i + 1 + pre_pos) % pre_size];
+		    pre_buffer[k][(i + pre_pos) % pre_size];
 	    }
 	}
 	sf_writef_float(out, buf, j);
