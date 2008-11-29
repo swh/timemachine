@@ -16,7 +16,10 @@ This app requires:
     * JACK
     * GTK+ 2.x
     * libsndfile
-    * and optionally LASH
+
+and optionally:
+    * LASH
+    * liblo
 
 You will also need the -devel packages if you're using packages.
 

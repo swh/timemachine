@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
     }
 
     /* Register with jack */
-    if ((client = jack_client_new(client_name)) == 0) {
+    if ((client = jack_client_open(client_name, 0, NULL)) == 0) {
 	DEBUG(0, "jack server not running?\n");
 	exit(1);
     }
