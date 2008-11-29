@@ -127,10 +127,17 @@ int writer_thread(void *d)
     time(&t);
     t -= pre_time;
     parts = localtime(&t);
-    filename = g_strdup_printf("%s%04d-%02d-%02dT%02d:%02d:%02d.%s",
+    if (safe_filename) {
+	filename = g_strdup_printf("%s%04d-%02d-%02dT%02d-%02d-%02d.%s",
 	     prefix,
 	     parts->tm_year + 1900, parts->tm_mon + 1, parts->tm_mday,
 	     parts->tm_hour, parts->tm_min, parts->tm_sec, format_name);
+    } else {
+	filename = g_strdup_printf("%s%04d-%02d-%02dT%02d:%02d:%02d.%s",
+	     prefix,
+	     parts->tm_year + 1900, parts->tm_mon + 1, parts->tm_mday,
+	     parts->tm_hour, parts->tm_min, parts->tm_sec, format_name);
+    }
 
     /* Open the output file */
     info.samplerate = jack_get_sample_rate(client);

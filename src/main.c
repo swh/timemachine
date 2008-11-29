@@ -64,6 +64,7 @@ char *client_name = DEFAULT_CLIENT_NAME;
 char *prefix = DEFAULT_PREFIX;
 char *format_name = DEFAULT_FORMAT;
 int format_sf = 0;
+int safe_filename = 0;
 
 jack_port_t *ports[MAX_PORTS];
 jack_client_t *client;
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
      lash_event_t *event;
 #endif
 
-    while ((opt = getopt(argc, argv, "hic:t:n:p:f:")) != -1) {
+    while ((opt = getopt(argc, argv, "hic:t:n:p:f:s")) != -1) {
 	switch (opt) {
 	case 'h':
 	    help = 1;
@@ -111,6 +112,9 @@ int main(int argc, char *argv[])
 	case 'f':
 	    format_name = optarg;
 	    break;
+	case 's':
+	    safe_filename = 1;
+	    break;
 	default:
 	    num_ports = 0;
 	    break;
@@ -131,6 +135,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\t-n\tspecify the JACK name timemachine will use\n");
 	fprintf(stderr, "\t-t\tspecify the pre-recording buffer length\n");
 	fprintf(stderr, "\t-p\tspecify the saved file prefix, may include path\n");
+	fprintf(stderr, "\t-s\tuse safer characters in filename (windows compatibility)\n");
 	fprintf(stderr, "\t-f\tspecify the saved file format\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "\tchannels must be in the range 1-8, default %d\n",
