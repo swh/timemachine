@@ -24,8 +24,8 @@
 #include "gtkmeter.h"
 #include "threads.h"
 #include "support.h"
+#include "meters.h"
 
-#define lin2db(lin) (20.0f * log10(lin))
 static GtkAdjustment *meter_adj[MAX_PORTS];
 
 void bind_meters()

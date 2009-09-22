@@ -36,9 +36,10 @@ float *pre_buffer[MAX_PORTS];
 float *disk_buffer[MAX_PORTS];
 
 static int recording = 0;	    /* recording yes/no */
+static int user_recording = 0;	    /* recording initiated by user yes/no */
 static int quiting = 0;		    /* quit pending yes/no */
-volatile int recording_done = 0;    /* quit pending yes/no */
-volatile int syncing_done = 0;      /* finsihed writing pre-buffer */
+volatile int recording_done = 0;    /* recording completed after quit */
+volatile int need_ui_sync = 0;      /* need to update record button */
 
 static unsigned int pre_time = 0;
 static unsigned int pre_size = 0;
@@ -49,10 +50,13 @@ static unsigned int disk_write_pos = 0;
 /* Peak data for meters */
 static volatile float peak[MAX_PORTS];
 
+static unsigned int silent_count = 0;
+
 int process(jack_nframes_t nframes, void *arg)
 {
     unsigned int i, port, pos = 0;
     const unsigned int rec = recording;
+    const jack_nframes_t sample_rate = jack_get_sample_rate(client);
 
     for (port = 0; port < num_ports; port++) {
 	jack_default_audio_sample_t *in;
@@ -68,6 +72,29 @@ int process(jack_nframes_t nframes, void *arg)
 	if (!in) {
 	    fprintf(stderr, "bad buffer!\n");
 	    break;
+	}
+
+	if (auto_record) {
+	    if (rec && !user_recording) {
+		for (i = 0; i < nframes; i++) {
+		    if (fabsf(in[i]) <= auto_end_threshold) {
+			silent_count++;
+		    } else {
+			silent_count = 0;
+		    }
+		}
+		if (silent_count > (auto_end_time * sample_rate * num_ports)) {
+		    recording = 0;
+		}
+	    } else {
+		for (i = 0; i < nframes; i++) {
+		    if (fabsf(in[i]) > auto_begin_threshold) {
+			recording = 1;
+			silent_count = 0;
+			break;
+		    }
+		}
+	    }
 	}
 
 	for (i = 0; i < nframes; i++) {
@@ -176,7 +203,7 @@ int writer_thread(void *d)
     }
 
     /* This tells the UI that were ready to go again, it will reset it */
-    syncing_done = 1;
+    need_ui_sync = 1;
 
     if (recording) printf("writing realtime data...\n");
 
@@ -195,6 +222,8 @@ int writer_thread(void *d)
 	usleep(10);
     }
     sf_close(out);
+
+    need_ui_sync = 1;
 
     printf("done writing...\n");
 
@@ -217,7 +246,8 @@ void process_init(unsigned int time)
 	fprintf(stderr, "timemachine: buffer time must be 1 second or "
 			"greater\n");
 	exit(1);
-    } if (time > MAX_TIME) {
+    }
+    if (time > MAX_TIME) {
 	fprintf(stderr, "timemachine: buffer time must be %d seconds or "
 			"less\nthis is for your own good, it really will not"
 			"work well with buffers that size\n", MAX_TIME);
@@ -241,11 +271,13 @@ void process_init(unsigned int time)
 void recording_start()
 {
     recording = 1;
+    user_recording = 1;
 }
 
 void recording_stop()
 {
     recording = 0;
+    user_recording = 0;
 }
 
 void recording_quit()
@@ -259,12 +291,19 @@ gboolean meter_tick(gpointer user_data)
     float data[MAX_PORTS];
     unsigned int i;
 
-    if (syncing_done && !recording) {
+    if (need_ui_sync) {
 	GtkWidget *img = lookup_widget(main_window, "toggle_image");
 
-	syncing_done = 0;
-	gtk_image_set_from_pixbuf(GTK_IMAGE(img), img_off);
+	if (recording) {
+	    gtk_image_set_from_pixbuf(GTK_IMAGE(img), img_on);
+	    gtk_window_set_icon(GTK_WINDOW(main_window), icon_on);
+	} else {
+	    gtk_image_set_from_pixbuf(GTK_IMAGE(img), img_off);
+	    gtk_window_set_icon(GTK_WINDOW(main_window), icon_off);
+	}
 	gtk_widget_set_sensitive(img, TRUE);
+
+	need_ui_sync = 0;
     }
 
     for (i=0; i<MAX_PORTS; i++) {

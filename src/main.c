@@ -1,5 +1,7 @@
 /*
  *  Copyright (C) 2004 Steve Harris
+ *  Copyright (C) 2006 Garett Shulman
+ *  Copyright (C) 2009 Adam Sampson
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,8 +51,6 @@ lash_client_t *lash_client;
 #include "support.h"
 #include "main.h"
 
-#define DEFAULT_BUF_LENGTH 10 /* in seconds */
-
 #define DEBUG(lvl, txt...) \
     if (verbosity >= lvl) fprintf(stderr, PACKAGE ": " txt)
 
@@ -69,6 +69,10 @@ char *prefix = DEFAULT_PREFIX;
 char *format_name = DEFAULT_FORMAT;
 int format_sf = 0;
 int safe_filename = 0;
+int auto_record = 0;
+float auto_begin_threshold = 0.0;
+float auto_end_threshold = 0.0;
+unsigned int auto_end_time = DEFAULT_AUTO_END_TIME;
 
 jack_port_t *ports[MAX_PORTS];
 jack_client_t *client;
@@ -96,7 +100,10 @@ int main(int argc, char *argv[])
      lash_event_t *event;
 #endif
 
-    while ((opt = getopt(argc, argv, "hic:t:n:p:f:s")) != -1) {
+    auto_begin_threshold = db2lin(DEFAULT_AUTO_BEGIN_THRESHOLD);
+    auto_end_threshold = db2lin(DEFAULT_AUTO_END_THRESHOLD);
+
+    while ((opt = getopt(argc, argv, "hic:t:n:p:f:sab:e:T:")) != -1) {
 	switch (opt) {
 	case 'h':
 	    help = 1;
@@ -126,6 +133,18 @@ int main(int argc, char *argv[])
 	case 's':
 	    safe_filename = 1;
 	    break;
+	case 'a':
+	    auto_record = 1;
+	    break;
+	case 'b':
+	    auto_begin_threshold = db2lin(atof(optarg));
+	    break;
+	case 'e':
+	    auto_end_threshold = db2lin(atof(optarg));
+	    break;
+	case 'T':
+	    auto_end_time = atoi(optarg);
+	    break;
 	default:
 	    num_ports = 0;
 	    break;
@@ -138,7 +157,8 @@ int main(int argc, char *argv[])
 
     if (num_ports < 1 || num_ports > MAX_PORTS || help) {
 	fprintf(stderr, "Usage %s: [-h] [-i] [-c channels] [-n jack-name]\n\t"
-			"[-t buffer-length] [-p file prefix] [-f format] "
+			"[-t buffer-length] [-p file prefix] [-f format]\n\t"
+			"[-a] [-b begin-threshold] [-e end-threshold] [-T end-time]\n\t"
 			"[port-name ...]\n\n", argv[0]);
 	fprintf(stderr, "\t-h\tshow this help\n");
 	fprintf(stderr, "\t-i\tinteractive mode (console instead of X11) also enabled\n\t\tif DISPLAY is unset\n");
@@ -148,6 +168,10 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\t-p\tspecify the saved file prefix, may include path\n");
 	fprintf(stderr, "\t-s\tuse safer characters in filename (windows compatibility)\n");
 	fprintf(stderr, "\t-f\tspecify the saved file format\n");
+	fprintf(stderr, "\t-a\tenable automatic sound-triggered recording\n");
+	fprintf(stderr, "\t-b\tspecify threshold above which automatic recording will begin\n");
+	fprintf(stderr, "\t-e\tspecify threshold below which automatic recording will end\n");
+	fprintf(stderr, "\t-T\tspecify silence length before automatic recording ends\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "\tchannels must be in the range 1-8, default %d\n",
 			DEFAULT_NUM_PORTS);
@@ -155,6 +179,9 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\tfile-prefix, default \"%s\"\n", DEFAULT_PREFIX);
 	fprintf(stderr, "\tbuffer-length, default %d secs\n", DEFAULT_BUF_LENGTH);
 	fprintf(stderr, "\tformat, default '%s', options: wav, w64\n", DEFAULT_FORMAT);
+	fprintf(stderr, "\tbegin-threshold, default %.1f dB\n", DEFAULT_AUTO_BEGIN_THRESHOLD);
+	fprintf(stderr, "\tend-threshold, default %.1f dB\n", DEFAULT_AUTO_END_THRESHOLD);
+	fprintf(stderr, "\tend-time, default %d secs\n", DEFAULT_AUTO_END_TIME);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "specifying port names to connect to on the command line overrides -c\n\n");
 	exit(1);
@@ -170,7 +197,7 @@ int main(int argc, char *argv[])
 #endif
 
     if (format_sf == 0) {
-	fprintf(stderr, "Unkown format '%s'\n", format_name);
+	fprintf(stderr, "Unknown format '%s'\n", format_name);
     }
 
     /* Register with jack */

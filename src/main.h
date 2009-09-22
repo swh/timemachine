@@ -9,6 +9,7 @@
 #define MAX_PORTS 		8
 #define MAX_TIME		3600
 
+#define DEFAULT_BUF_LENGTH	10 /* in seconds */
 #define DEFAULT_NUM_PORTS 	2
 #define DEFAULT_CLIENT_NAME 	"TimeMachine"
 #define DEFAULT_PREFIX 		"tm-"
@@ -21,6 +22,10 @@
 
 #define OSC_PORT "7133"
 
+#define DEFAULT_AUTO_BEGIN_THRESHOLD	-35.0
+#define DEFAULT_AUTO_END_THRESHOLD	DEFAULT_AUTO_BEGIN_THRESHOLD
+#define DEFAULT_AUTO_END_TIME		DEFAULT_BUF_LENGTH
+
 extern GtkWidget *main_window;
 
 extern GdkPixbuf *img_on, *img_off, *img_busy;
@@ -31,6 +36,10 @@ extern char *prefix;
 extern char *format_name;
 extern int format_sf;
 extern int safe_filename;
+extern int auto_record;
+extern float auto_begin_threshold;
+extern float auto_end_threshold;
+extern unsigned int auto_end_time;
 extern jack_client_t *client;
 extern jack_port_t *ports[MAX_PORTS];
 
