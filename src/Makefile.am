@@ -18,7 +18,3 @@ timemachine_SOURCES = \
 	threads.c threads.h 
 
 timemachine_LDADD = @PACKAGE_LIBS@
-
-timemachine_control_SOURCE = timemachine-control.c
-timemachine_control_LDADD = @LIBLO_LIBS@
-
