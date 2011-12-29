@@ -85,6 +85,7 @@ int osc_handler(const char *path, const char *types, lo_arg **argv, int argc,
 		lo_message msg, void *user_data);
 int osc_handler_nox(const char *path, const char *types, lo_arg **argv,
 		int argc, lo_message msg, void *user_data);
+char *osc_port = DEFAULT_OSC_PORT;
 #endif
 
 int main(int argc, char *argv[])
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
     auto_begin_threshold = db2lin(DEFAULT_AUTO_BEGIN_THRESHOLD);
     auto_end_threshold = db2lin(DEFAULT_AUTO_END_THRESHOLD);
 
-    while ((opt = getopt(argc, argv, "hic:t:n:p:f:sab:e:T:")) != -1) {
+    while ((opt = getopt(argc, argv, "hic:t:n:p:f:sab:e:T:o:")) != -1) {
 	switch (opt) {
 	case 'h':
 	    help = 1;
@@ -145,6 +146,11 @@ int main(int argc, char *argv[])
 	case 'T':
 	    auto_end_time = atoi(optarg);
 	    break;
+	case 'o':
+#ifdef HAVE_LIBLO
+	    osc_port = optarg;
+#endif
+	    break;
 	default:
 	    num_ports = 0;
 	    break;
@@ -172,6 +178,9 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\t-b\tspecify threshold above which automatic recording will begin\n");
 	fprintf(stderr, "\t-e\tspecify threshold below which automatic recording will end\n");
 	fprintf(stderr, "\t-T\tspecify silence length before automatic recording ends\n");
+#ifdef HAVE_LIBLO
+	fprintf(stderr, "\t-o\tspecify the OSC port timemachine will listen on\n");
+#endif
 	fprintf(stderr, "\n");
 	fprintf(stderr, "\tchannels must be in the range 1-8, default %d\n",
 			DEFAULT_NUM_PORTS);
@@ -182,6 +191,9 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\tbegin-threshold, default %.1f dB\n", DEFAULT_AUTO_BEGIN_THRESHOLD);
 	fprintf(stderr, "\tend-threshold, default %.1f dB\n", DEFAULT_AUTO_END_THRESHOLD);
 	fprintf(stderr, "\tend-time, default %d secs\n", DEFAULT_AUTO_END_TIME);
+#ifdef HAVE_LIBLO
+	fprintf(stderr, "\tosc-port, default %s\n", DEFAULT_OSC_PORT);
+#endif
 	fprintf(stderr, "\n");
 	fprintf(stderr, "specifying port names to connect to on the command line overrides -c\n\n");
 	exit(1);
@@ -258,13 +270,13 @@ int main(int argc, char *argv[])
 #ifdef HAVE_LIBREADLINE
     if (console || !getenv("DISPLAY") || getenv("DISPLAY")[0] == '\0') {
 #ifdef HAVE_LIBLO
-      lo_server_thread st = lo_server_thread_new(OSC_PORT, NULL);
+      lo_server_thread st = lo_server_thread_new(osc_port, NULL);
       if (st) {
 	  lo_server_thread_add_method(st, "/start", "", osc_handler_nox, (void *)1);
 	  lo_server_thread_add_method(st, "/stop", "", osc_handler_nox, (void *)0);
 	  lo_server_thread_start(st);
 	  printf("Listening for OSC requests on osc.udp://localhost:%s\n",
-	    OSC_PORT);
+	    osc_port);
       }
 #endif
 
@@ -311,13 +323,13 @@ int main(int argc, char *argv[])
       g_timeout_add(100, meter_tick, NULL);
 
 #ifdef HAVE_LIBLO
-    lo_server_thread st = lo_server_thread_new(OSC_PORT, NULL);
+    lo_server_thread st = lo_server_thread_new(osc_port, NULL);
     if (st) {
 	lo_server_thread_add_method(st, "/start", "", osc_handler, (void *)1);
 	lo_server_thread_add_method(st, "/stop", "", osc_handler, (void *)0);
 	lo_server_thread_start(st);
 	printf("Listening for OSC requests on osc.udp://localhost:%s\n",
-	       OSC_PORT);
+	       osc_port);
     }
 #endif
 

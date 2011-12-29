@@ -20,7 +20,7 @@
 #define DEFAULT_FORMAT 	"wav"
 #endif
 
-#define OSC_PORT "7133"
+#define DEFAULT_OSC_PORT "7133"
 
 #define DEFAULT_AUTO_BEGIN_THRESHOLD	-35.0
 #define DEFAULT_AUTO_END_THRESHOLD	DEFAULT_AUTO_BEGIN_THRESHOLD
@@ -42,5 +42,6 @@ extern float auto_end_threshold;
 extern unsigned int auto_end_time;
 extern jack_client_t *client;
 extern jack_port_t *ports[MAX_PORTS];
+extern char *osc_port;
 
 #endif
