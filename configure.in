@@ -13,6 +13,7 @@ AC_HEADER_STDC
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0.0])
 PKG_CHECK_MODULES(JACK, [jack >= 0.80.0])
 PKG_CHECK_MODULES(LIBLO, liblo >= 0.24, LO_FOUND="yes", LO_FOUND="no")
+AC_CHECK_LIB([m],[pow])
 
 if test "$LO_FOUND" = "yes"; then
 	AC_DEFINE(HAVE_LIBLO, 1, [whether or not we are supporting OSC])
