@@ -13,6 +13,7 @@ AC_HEADER_STDC
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.0.0])
 PKG_CHECK_MODULES(JACK, [jack >= 0.80.0])
 PKG_CHECK_MODULES(LIBLO, liblo >= 0.24, LO_FOUND="yes", LO_FOUND="no")
+AC_CHECK_LIB([m],[pow])
 
 if test "$LO_FOUND" = "yes"; then
 	AC_DEFINE(HAVE_LIBLO, 1, [whether or not we are supporting OSC])
@@ -62,7 +63,16 @@ AC_CHECK_DECL(
 	[AC_MSG_WARN()
 	 AC_MSG_WARN([Your version of libsndfile does not support the WAV64])
 	 AC_MSG_WARN([format. This means that you will be unable to record])
-	 AC_MSG_WARN([files > 2GB])
+	 AC_MSG_WARN([WAV files > 2GB])
+	 AC_MSG_WARN()],
+	[#include <sndfile.h>]
+)
+AC_CHECK_DECL(
+	SF_FORMAT_FLAC,
+	[AC_DEFINE(HAVE_FLAC, [], [Do we have the FLAC format])],
+	[AC_MSG_WARN()
+	 AC_MSG_WARN([Your version of libsndfile does not support the FLAC])
+	 AC_MSG_WARN([format.])
 	 AC_MSG_WARN()],
 	[#include <sndfile.h>]
 )

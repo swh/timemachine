@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "\tjack-name, default \"%s\"\n", DEFAULT_CLIENT_NAME);
 	fprintf(stderr, "\tfile-prefix, default \"%s\"\n", DEFAULT_PREFIX);
 	fprintf(stderr, "\tbuffer-length, default %d secs\n", DEFAULT_BUF_LENGTH);
-	fprintf(stderr, "\tformat, default '%s', options: wav, w64\n", DEFAULT_FORMAT);
+	fprintf(stderr, "\tformat, default '%s', options: wav, w64, flac\n", DEFAULT_FORMAT);
 	fprintf(stderr, "\tbegin-threshold, default %.1f dB\n", DEFAULT_AUTO_BEGIN_THRESHOLD);
 	fprintf(stderr, "\tend-threshold, default %.1f dB\n", DEFAULT_AUTO_END_THRESHOLD);
 	fprintf(stderr, "\tend-time, default %d secs\n", DEFAULT_AUTO_END_TIME);
@@ -205,6 +205,11 @@ int main(int argc, char *argv[])
 #ifdef HAVE_W64
     if (!strcasecmp(format_name, "w64")) {
 	format_sf = SF_FORMAT_W64 | SF_FORMAT_FLOAT;
+    }
+#endif
+#ifdef HAVE_FLAC
+    if (!strcasecmp(format_name, "flac")) {
+	format_sf = SF_FORMAT_FLAC | SF_FORMAT_PCM_24;
     }
 #endif
 
