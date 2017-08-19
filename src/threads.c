@@ -128,6 +128,16 @@ int process(jack_nframes_t nframes, void *arg)
     return 0;
 }
 
+float clamp_sample(float sample)
+{
+	// some audio formats (FLAC) will generate faulty files if data out of range, so clamp the sample
+	if(sample < -0.999)
+		sample = -0.999;
+	else if(sample > 0.999)
+		sample = 0.999;
+	return sample;
+}
+
 int writer_thread(void *d)
 {
     unsigned int i, j, k, opos;
@@ -191,7 +201,7 @@ int writer_thread(void *d)
 	for (j = 0; j < BUF_SIZE && i < pre_size; i++, j++) {
 	    for (k = 0; k < num_ports; k++) {
 		buf[j * num_ports + k] =
-		    pre_buffer[k][(i + pre_pos) % pre_size];
+		    clamp_sample( pre_buffer[k][(i + pre_pos) % pre_size] );
 	    }
 	}
 	sf_writef_float(out, buf, j);
@@ -213,7 +223,7 @@ int writer_thread(void *d)
 	for (i = disk_read_pos; i != disk_write_pos && opos < BUF_SIZE;
 	     i = (i + 1) & (DISK_SIZE - 1), opos++) {
 	    for (j = 0; j < num_ports; j++) {
-		buf[opos * num_ports + j] = disk_buffer[j][i];
+			buf[opos * num_ports + j] = clamp_sample(disk_buffer[j][i]);
 	    }
 	}
 	sf_writef_float(out, buf, opos);
