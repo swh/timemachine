@@ -48,10 +48,10 @@ static float iec_scale(float db);
 
 static GtkWidgetClass *parent_class = NULL;
 
-guint
+GtkType
 gtk_meter_get_type ()
 {
-  static guint meter_type = 0;
+  static GtkType meter_type = 0;
 
   if (!meter_type)
     {
