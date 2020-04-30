@@ -67,7 +67,7 @@ GtkWidget*     gtk_meterscale_new               (gint direction,
 						 gfloat min,
 						 gfloat max);
 
-guint          gtk_meterscale_get_type          (void);
+GtkType        gtk_meterscale_get_type          (void);
 
 #ifdef __cplusplus
 }

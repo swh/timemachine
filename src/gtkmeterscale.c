@@ -45,10 +45,10 @@ static void meterscale_draw_notch(GtkMeterScale *meterscale, float db, int
 
 static GtkWidgetClass *parent_class = NULL;
 
-guint
+GtkType
 gtk_meterscale_get_type ()
 {
-  static guint meterscale_type = 0;
+  static GtkType meterscale_type = 0;
 
   if (!meterscale_type)
     {
