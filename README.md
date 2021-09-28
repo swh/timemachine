@@ -20,6 +20,7 @@ This app requires:
 * libsndfile
 
 and optionally:
+
 * LASH
 * liblo
 
@@ -41,7 +42,9 @@ from, not when you click.
 
 ## OSC
 
-timemachine supports starting stopping via OSC, triggered by sending a message with the path `/start` or `/stop` and no arguments.
+If you compiled with liblo, TimeMachine supports starting stopping via OSC,
+triggered by sending a message with the path `/start` or `/stop` and no
+arguments.
 
 Example Python code:
 
