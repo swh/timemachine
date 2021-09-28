@@ -15,13 +15,13 @@ without having to try and recreate it. :)
 
 This app requires:
 
-    * JACK
-    * GTK+ 2.x
-    * libsndfile
+* JACK
+* GTK+ 2.x
+* libsndfile
 
 and optionally:
-    * LASH
-    * liblo
+* LASH
+* liblo
 
 You will also need the -devel packages if you're using packages.
 
