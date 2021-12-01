@@ -181,6 +181,9 @@ int writer_thread(void *d)
 	goto again;
     }
 
+    /* Turn on automatic clipping for integer formats */
+    sf_command(out, SFC_SET_CLIPPING, NULL, SF_TRUE);
+
     printf("opened '%s'\n", filename);
     printf("writing buffer...\n");
     free(filename);
