@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     }
 
     if (!strcasecmp(format_name, "wav")) {
-	format_sf = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+	format_sf = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
     }
 #ifdef HAVE_W64
     if (!strcasecmp(format_name, "w64")) {
